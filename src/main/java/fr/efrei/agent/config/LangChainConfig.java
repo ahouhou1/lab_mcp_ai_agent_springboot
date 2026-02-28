@@ -1,5 +1,5 @@
 package fr.efrei.agent.config;
-
+import fr.efrei.agent.tools.AgentTool;
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
 //import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.service.AiServices;
@@ -43,13 +43,14 @@ public class LangChainConfig {
 //  }
 
     @Bean
-    public BacklogAgent backlogAgent(AnthropicChatModel model,
-                                     ObjectProvider<List<Object>> toolBeansProvider) {
-        List<Object> toolBeans = toolBeansProvider.getIfAvailable(List::of);
+    public BacklogAgent backlogAgent(AnthropicChatModel model, List<AgentTool> tools) {
+        var builder = AiServices.builder(BacklogAgent.class)
+                .chatModel(model);
 
-        return AiServices.builder(BacklogAgent.class)
-                .chatModel(model)
-                .tools(toolBeans)
-                .build();
+        if (tools != null && !tools.isEmpty()) {
+            builder.tools(tools.toArray(new Object[0]));
+        }
+
+        return builder.build();
     }
 }
